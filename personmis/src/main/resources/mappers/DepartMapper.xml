@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.DepartRepository">
+    <!-- 查询所有部门 -->
+    <select id="selectDepart"  resultType="Depart" parameterType="DepartByCon">
+		select id,dname,dtype,dtel,dfax,description,supdepartment,date_format(establishmentdate,'%Y-%m-%d') as establishmentdate1  from department
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+	<!-- 条件查询部门 -->
+	<select id="selectDepartmentsByCon"  resultType="Depart" parameterType="DepartByCon">
+		select
+			id,dname,dtype,dtel,dfax,description,supdepartment,date_format(establishmentdate,'%Y-%m-%d') as establishmentdate1
+		from department
+		where 1=1
+		<if test="dname !=null and dname!=''">
+			and dname like concat('%',#{dname},'%')
+		</if>
+		<if test="dtype !=null and dtype!=''">
+			and dtype = #{dtype}
+		</if>
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+<!--	1. 这段代码是一个查询语句，用于从department表中查询id，dname，dtype，dtel，dfax，description，supdepartment，establishmentdate1字段的数据。
+2. 其中，如果dname不为空，则会添加一个模糊查询条件，如果dtype不为空，则会添加一个精确查询条件，如果act等于byPage，则会添加一个分页查询条件。
+ where 1=1是一个永远为真的条件，用于拼接查询条件，以便更方便地添加查询条件。
+分页查询条件是指从数据库中查询指定范围的数据，通常用于分页显示数据。-->
+<!--	解释一下：limit #{startIndex}, #{pageSize}是MySQL中的一个语句，用于限制查询结果的记录数。startIndex表示从第几条记录开始，pageSize表示每页显示的记录数。
+startIndex的值是什么？解释一下：
+startIndex的值是当前页码减1乘以每页显示的记录数，即：startIndex = (currentPage - 1) * pageSize。
+1. 这段代码是一个查询语句，用于从department表中查询id，dname，dtype，dtel，dfax，description，supdepartment，establishmentdate1字段的数据。
+2. 其中，如果dname不为空，则会添加一个模糊查询条件，如果dtype不为空，则会添加一个精确查询条件，如果act等于byPage，则会添加一个分页查询条件。
+where 1=1是一个永远为真的条件，用于拼接查询条件，以便更方便地添加查询条件。
+分页查询条件是指从数据库中查询指定范围的数据，通常用于分页显示数据。
+
+limit #{startIndex}, #{pageSize}表示从startIndex开始，查询pageSize条数据。
+pagesize的个数在前端定义的，该前端定义的个数为2 所以页面显示两个数据
+例如：limit 0, 10表示从第0条数据开始，查询10条数据。-->
+
+    <!-- 添加部门 -->
+    <insert id="addDepart"  parameterType="Depart">
+		insert into department (id,dname,dtype,dtel,dfax,description,supdepartment,establishmentdate)
+		values (null, #{dname}, #{dtype}, #{dtel}, #{dfax}, #{description}, #{supdepartment}, now())
+	</insert>
+	<!-- 查询一个部门 -->
+
+<!--	如果id != 1，则执行<if>标签内的SQL语句，包括关联查询department d2来获取上级部门的名称，并将结果字段别名设置为supdepartment1。因为d==1是上级部门-->
+<!--	如果id == 1，则执行另一个<if>标签内的SQL语句，直接将上级部门的名称设为'顶级部门'。-->
+	<select id="getDepartmentDetail" resultType="Depart" parameterType="Integer">
+		select d1.id,d1.dname,d1.dtype,d1.dtel,d1.dfax,d1.description,
+		<if test="id != 1">
+			d1.supdepartment, d2.dname as supdepartment1,
+			date_format(d1.establishmentdate,'%Y-%m-%d') as establishmentdate1
+			from department d1,department d2 where d1.id = #{id} and d1.supdepartment = d2.id
+		</if>
+		<if test="id == 1">
+			d1.supdepartment, '顶级部门' as supdepartment1,
+			date_format(d1.establishmentdate,'%Y-%m-%d') as establishmentdate1
+			from department d1 where d1.id = #{id}
+		</if>
+	</select>
+
+
+
+	<!-- 修改部门 -->
+	<update id="updateDepartment" parameterType="Depart">
+		update department
+		<set>
+			<if test="dname != null">
+				dname = #{dname},
+			</if>
+			<if test="dtype != null">
+				dtype = #{dtype},
+			</if>
+			<if test="dtel != null">
+				dtel = #{dtel},
+			</if>
+			<if test="dfax != null">
+				dfax = #{dfax},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			<if test="supdepartment != null">
+				supdepartment = #{supdepartment}
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+	<!--查询关联部门-->
+	<select id="selectAssociateDepart" resultType="map" parameterType="Integer">
+		SELECT DISTINCT d.id, s.id
+		 FROM department d, staff s WHERE d.supdepartment = #{id} or s.depart_id  = #{id}
+	</select>
+<!--	DISTINCT 关键字用于去除重复的结果。-->
+	<!--删除部门-->
+	<delete id="deleteDepart" parameterType="Integer">
+		delete from department where id = #{id}
+	</delete>
+</mapper>

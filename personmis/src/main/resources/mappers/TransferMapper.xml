@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.TransferRepository">
+    <!-- 查询调动一个员工 -->
+    <select id="getBeforePost" resultType="Transfer">
+		select s.sname as sname, p.id as beforepost_id,
+		p.pname as beforepost_name
+		 from staff s, post p where s.id = #{id} and s.post_id = p.id
+	</select>
+	<!-- 更新调动员工岗位 -->
+	<update id="updateStaff" parameterType="Transfer">
+		update staff
+		<set>
+			post_id = #{afterpost_id} where id = #{staff_id}
+		</set>
+	</update>
+	<!-- 记录调动员工 -->
+	<insert id="addTransferStaff"  parameterType="Transfer">
+		insert into transfer values(null,#{staff_id},#{sname},#{beforepost_id},#{afterpost_id},#{ttype},#{tdate},now())
+	</insert>
+	<!-- 查询调动员工 -->
+	<select id="selectTransfer" resultType="Transfer" parameterType="Transfer">
+		select t.staff_id, t.sname,t.ttype,
+		ap.pname as afterpost_name,
+		bp.pname as beforepost_name,
+		DATE_FORMAT(t.tdate,'%Y-%m-%d') as tdate1,DATE_FORMAT(t.opdate,'%Y-%m-%d') as opdate1
+		 from transfer t, post bp, post ap
+		 where t.beforepost_id = bp.id and t.afterpost_id = ap.id
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+	<!-- 条件查询调动员工 -->
+	<select id="selectTransfersByCon" resultType="Transfer" parameterType="Transfer">
+		select t.staff_id, t.sname,t.ttype,
+		ap.pname as afterpost_name,
+		bp.pname as beforepost_name,
+		DATE_FORMAT(t.tdate,'%Y-%m-%d') as tdate1,DATE_FORMAT(t.opdate,'%Y-%m-%d') as opdate1
+		from transfer t, post bp, post ap
+		where t.beforepost_id = bp.id and t.afterpost_id = ap.id
+		<if test="sname != null and sname != ''">
+			and t.sname like concat('%',#{sname},'%')
+		</if>
+		<if test="staff_id != null and staff_id != 0">
+			and t.staff_id = #{staff_id}
+		</if>
+		<if test="ttype != null and ttype != ''">
+			and t.ttype = #{ttype}
+		</if>
+		<if test="startdate != null and enddate != null" >
+			and date(t.tdate ) between #{startdate} and #{enddate}
+		</if>
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+</mapper>

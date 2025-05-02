@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.PlanRepository">
+    <!-- 查询所有部门 -->
+    <select id="selectPlan"  resultType="Plan" parameterType="PlanByCon">
+		select id,dname,dtype,description,date_format(plandate,'%Y-%m-%d') as plandate1  from plan
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+	<!-- 条件查询部门 -->
+	<select id="selectPlansByCon"  resultType="Plan" parameterType="PlanByCon">
+		select
+			id,dname,dtype,description,date_format(plandate,'%Y-%m-%d') as plandate1
+		from plan
+		where 1=1
+		<if test="dname !=null and dname!=''">
+			and dname like concat('%',#{dname},'%')
+		</if>
+		<if test="dtype !=null and dtype!=''">
+			and dtype = #{dtype}
+		</if>
+		<if test="act == 'byPage'" >
+			limit #{startIndex}, #{pageSize}
+		</if>
+	</select>
+    <!-- 添加部门 -->
+<!--    <insert id="addPlan"  parameterType="Plan">-->
+<!--		insert into plan (id,dname,dtype,description,plandate)-->
+<!--		values (null, #{dname}, #{dtype}, #{description}, now())-->
+<!--	</insert>-->
+	<insert id="addPlan" parameterType="Plan">
+		insert into plan (id,dname,dtype,description,plandate,coach_id) values (null, #{dname}, #{dtype}, #{description}, now(),#{coach_id})
+	</insert>
+
+	<!-- 查询一个部门 -->
+	<select id="getPlanDetail" resultType="Plan" parameterType="Integer">
+		select * from  plan where id = #{id}
+	</select>
+<!--		<if test="id != 1">-->
+<!--			d1.supdepartment, d2.dname as supdepartment1,-->
+<!--			date_format(d1.establishmentdate,'%Y-%m-%d') as establishmentdate1-->
+<!--			from department d1,department d2 where d1.id = #{id} and d1.supdepartment = d2.id-->
+<!--		</if>-->
+<!--		<if test="id ==ti 1">-->
+<!--			d1.supdepartment, '顶级部门' as supdepartment1,-->
+<!--			date_format(d1.establishmentdate,'%Y-%m-%d') as establishmentdate1-->
+<!--			from department d1 where d1.id = #{id}-->
+<!--		</if>-->
+	<!-- 修改部门 -->
+	<update id="updatePlan" parameterType="Plan">
+		update Plan
+		<set>
+			<if test="dname != null">
+				dname = #{dname},
+			</if>
+			<if test="dtype != null">
+				dtype = #{dtype},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+		</set>
+		where id = #{id}
+	</update>
+<!--	查询关联部门-->
+	<select id="selectAssociatePlan" resultType="map" parameterType="Integer">
+		SELECT DISTINCT d.id, s.id
+		 FROM plan d, staff s WHERE  s.depart_id  = #{id}
+	</select>
+	<!--删除部门-->
+	<delete id="deletePlan" parameterType="Integer">
+		delete from plan where id = #{id}
+	</delete>
+
+
+	<select id="getPlansNumByUid"  resultType="integer" parameterType="int">
+		select count(*) from plan where coach_id = #{coach_id}
+	</select>
+
+	<select id="getPlansByIdAndPage"  resultType="map">
+		select id,dname,dtype,description,coach_id,date_format(plandate,'%Y-%m-%d %H:%i:%s') plandate
+		from plan
+		where coach_id = #{id}
+			limit #{startIndex}, #{perPageSize}
+	</select>
+
+	<select id="getOrdersByUidAndPage"  resultType="map">
+		select id, amount, busertable_id, status, date_format(orderdate,'%Y-%m-%d %H:%i:%s') orderdate
+		from orderbasetable
+		where busertable_id = #{uid}
+			limit #{startIndex}, #{perPageSize}
+	</select>
+</mapper>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.ExamineRepository">
+    <!-- 录入员工 -->
+    <insert id="addPlayer"  parameterType="Player">
+        insert into examine values (null, #{sname}, #{sex}, #{birthday}, #{sid},
+        #{depart_id}, #{post_id}, #{entrydate}, #{joinworkdate}, #{workform}, #{staffsource},
+        #{score}, #{nation}, #{price}, #{stel}, #{semail}, #{sheight},
+        #{bloodtype}, #{weight}, #{registeredresidence}, #{education}, #{degree}, #{university},
+        #{picture}, #{graduationdate},#{startdate},#{enddate}
+        <if test="startdate != null">
+            ,'正常'
+        </if>
+        <if test="startdate == null">
+            ,#{status}
+        </if>
+        ,#{peroidopdate}
+        )
+    </insert>
+    <insert id="addPlayerCoach"  parameterType="Player">
+        insert into playercaoch values (null, #{sname}, #{sex}, #{birthday}, #{sid},
+        #{depart_id}, #{post_id}, #{entrydate}, #{joinworkdate}, #{workform}, #{staffsource},
+        #{score}, #{nation}, #{price}, #{stel}, #{semail}, #{sheight},
+        #{bloodtype}, #{weight}, #{registeredresidence}, #{education}, #{degree}, #{university},
+        #{picture}, #{graduationdate},#{startdate},#{enddate}
+        <if test="startdate != null">
+            ,'正常'
+        </if>
+        <if test="startdate == null">
+            ,#{status}
+        </if>
+        ,#{peroidopdate}
+        )
+    </insert>
+    <!-- 查询所有员工 -->
+    <select id="selectPlayer" resultType="Player" parameterType="PlayerByCon">
+		select * from examine s, department d, post p where s.depart_id = d.id and s.post_id = p.id
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+	</select>
+    <!-- 查询所有员工 -->
+    <select id="getPlayer" resultType="map" >
+        select sname,price,score,picture,post_id from examine
+    </select>
+    <select id="getPlayerCoach" resultType="map" >
+        select sname,price,score,picture,post_id from playercoach
+    </select>
+    <!-- 条件查询员工 -->
+    <select id="selectPlayerByCon" resultType="Player" parameterType="PlayerByCon">
+        select * from examine s, department d, post p where s.depart_id = d.id and s.post_id = p.id
+        <if test="sname != null and sname != ''">
+            and s.sname like concat('%',#{sname},'%')
+        </if>
+        <if test="depart_id != 0">
+            and s.depart_id = #{depart_id}
+        </if>
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+    </select>
+
+    <!-- 查询一个员工信息 -->
+    <select id="selectAPlayer" resultType="Player" parameterType="Integer">
+		select *,DATE_FORMAT(s.birthday,'%Y-%m-%d') as birthday1,DATE_FORMAT(s.entrydate,'%Y-%m-%d') as entrydate1,
+		DATE_FORMAT(s.joinworkdate,'%Y-%m-%d') as joinworkdate1,DATE_FORMAT(s.graduationdate,'%Y-%m-%d') as graduationdate1
+		,DATE_FORMAT(s.startdate,'%Y-%m-%d') as startdate1 ,DATE_FORMAT(s.enddate,'%Y-%m-%d') as enddate1  from examine s, department d, post p where s.id = #{id} and s.depart_id = d.id and s.post_id = p.id;
+	</select>
+
+    <update id="updatePlayer" parameterType="Player">
+        update examine
+        <set>
+            sname = #{sname},
+            sex =  #{sex},
+            birthday = #{birthday},
+            sid = #{sid},
+            depart_id =  #{depart_id},
+            post_id = #{post_id},
+            entrydate =  #{entrydate},
+            joinworkdate = #{joinworkdate},
+            workform =  #{workform},
+            staffsource = #{staffsource},
+            score =  #{score},
+            nation = #{nation},
+            price = #{price},
+            stel = #{stel},
+            semail =  #{semail},
+            sheight = #{sheight},
+            bloodtype =  #{bloodtype},
+            weight = #{weight},
+
+            registeredresidence =  #{registeredresidence},
+            education = #{education},
+            degree =  #{degree},
+            university = #{university},
+            graduationdate = #{graduationdate},
+            startdate = #{startdate},
+            enddate = #{enddate},
+        </set>
+        where id = #{id}
+    </update>
+    <!-- 修改一个员工信息 -->
+    <update id="updatePlayer1" parameterType="Player">
+        update examine
+        <set>
+            sname = #{sname},
+            sex =  #{sex},
+            birthday = #{birthday},
+            sid = #{sid},
+            depart_id =  #{depart_id},
+            post_id = #{post_id},
+            entrydate =  #{entrydate},
+            joinworkdate = #{joinworkdate},
+            workform =  #{workform},
+            staffsource = #{staffsource},
+            score =  #{score},
+            nation = #{nation},
+            price = #{price},
+--             nativeplace =  #{nativeplace},
+            stel = #{stel},
+            semail =  #{semail},
+            sheight = #{sheight},
+            bloodtype =  #{bloodtype},
+            maritalstatus = #{maritalstatus},
+            registeredresidence =  #{registeredresidence},
+            education = #{education},
+            degree =  #{degree},
+            university = #{university},
+            major =  #{major},
+            graduationdate = #{graduationdate},
+            startdate = #{startdate},
+            enddate = #{enddate},
+            price = #{price}
+        </set>
+        where id = #{id}
+    </update>
+    <!-- 试用期管理查询 -->
+    <select id="selectPeriodPlayer" resultType="Player">
+		select *,DATE_FORMAT(s.startdate,'%Y-%m-%d') as startdate1 ,DATE_FORMAT(s.enddate,'%Y-%m-%d') as enddate1 from examine s, department d, post p where s.depart_id = d.id and s.post_id = p.id and s.startdate IS NOT NULL  and s.enddate IS NOT NULL
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+	</select>
+    <!-- 条件查询试用期管理 -->
+    <select id="selectPeriodPlayerCon" resultType="Player">
+        select *,DATE_FORMAT(s.startdate,'%Y-%m-%d') as startdate1 ,DATE_FORMAT(s.enddate,'%Y-%m-%d') as enddate1  from examine s, department d, post p where s.depart_id = d.id and s.post_id = p.id
+        <if test="sname != null and sname != ''">
+            and s.sname like concat('%',#{sname},'%')
+        </if>
+        <if test="depart_id != 0">
+            and s.depart_id = #{depart_id}
+        </if>
+        <if test="post_id != 0">
+            and s.post_id = #{post_id}
+        </if>
+        <if test="status != null and status != ''">
+            and s.status = #{status}
+        </if>
+        <if test="startdate != null and enddate != null" >
+            and date(s.startdate ) between #{startdate} and #{enddate}
+            and date(s.enddate ) between #{startdate} and #{enddate}
+        </if>
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+    </select>
+    <!-- 试用期管理操作 -->
+    <update id="periodOp">
+        update examine
+        <set>
+            status = #{status},
+            peroidopdate = now()
+        </set>
+        where id=#{id}
+    </update>
+    <!--查询关联员工-->
+    <select id="selectAssociatePlayer" resultType="map" parameterType="Integer">
+		SELECT DISTINCT q.id, t.id from quit q, transfer t where
+            q.player_id = #{id} or t.player_id = #{id}
+	</select>
+    <!--删除员工-->
+    <delete id="deletePlayer" parameterType="Integer">
+		delete from examine where id = #{id}
+	</delete>
+    <!--删除员工-->
+    <delete id="deletePlayerCoach" parameterType="Integer">
+        delete from playercoach where id = #{id}
+    </delete>
+</mapper>

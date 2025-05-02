@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.QuitRepository">
+    <!-- 记录离职员工 -->
+    <insert id="addQuit"  parameterType="Quit">
+		insert into quit values(null,#{staff_id},#{sname},#{qtype},#{qdate},now())
+	</insert>
+
+    <delete id="deletestaff" parameterType="Integer">
+        delete from staff where id = #{staff_id}
+    </delete>
+    <!-- 查询离职员工 -->
+    <select id="selectQuitStaff" resultType="Quit">
+		select *,DATE_FORMAT(qdate,'%Y-%m-%d') as qdate1,DATE_FORMAT(opdate,'%Y-%m-%d') as opdate1 from quit
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+	</select>
+    <!-- 条件查询离职员工 -->
+    <select id="selectQuitsByCon" resultType="Quit" parameterType="Quit">
+        select *,DATE_FORMAT(qdate,'%Y-%m-%d') as qdate1,DATE_FORMAT(opdate,'%Y-%m-%d') as opdate1 from quit
+        where 1=1
+        <if test="sname != null and sname != ''">
+            and sname like concat('%',#{sname},'%')
+        </if>
+        <if test="staff_id != null and staff_id != 0">
+            and staff_id = #{staff_id}
+        </if>
+        <if test="qtype != null and qtype != ''">
+            and qtype = #{qtype}
+        </if>
+        <if test="startdate != null and enddate != null" >
+            and date(qdate ) between #{startdate} and #{enddate}
+        </if>
+        <if test="act == 'byPage'" >
+            limit #{startIndex}, #{pageSize}
+        </if>
+    </select>
+</mapper>

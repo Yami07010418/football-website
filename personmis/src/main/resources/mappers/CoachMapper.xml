@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ch.personmis.repository.CoachRepository">
+	<select id="login"  resultType="CoachEntity" parameterType="CoachEntity">
+		select * from coach where aname =  #{uname} and apwd = #{upwd}
+	</select>
+	<select id="isUse" parameterType="CoachEntity" resultType="CoachEntity">
+		select * from coach where aname = #{uname}
+	</select>
+	<insert id="register" parameterType="CoachEntity">
+		insert into coach (id, aname, apwd)  values(null, #{uname}, #{upwd})
+	</insert>
+</mapper>
